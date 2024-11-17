@@ -16,9 +16,10 @@
 ### 2) Database - For our Database we opted for MongoDB, giving us quick and easy access to our data, so we can use our RAG system effectively
 ### 3) RAG - With transfer learning from OpenAI we created a "similarity llm" which gives us similar food items and its allergens to improve the results
 ### 4) Frontend/App creation - For our frontend and app creation we used React Native to make the app compatible with your phone for quick and convenient use
-### (Frontend with TypeScript, Backend with Python, and MQL for Database)<br/><br/>
+### (Frontend with TypeScript, Backend with Python, and MQL for Database)
+
+### App Demonstration Video: 
+### https://drive.google.com/file/d/1h_9aE87udB6FUpW1nJQdhezl0gvbsWQF/view?usp=sharing<br/><br/>
 
 ### Experience the joy of food without the fear of allergies!
 
-### Demonstration Video: 
-### https://drive.google.com/file/d/1h_9aE87udB6FUpW1nJQdhezl0gvbsWQF/view?usp=sharing
