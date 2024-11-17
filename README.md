@@ -14,7 +14,7 @@ Never worry about hidden ingredients again! AllerView is your personal food safe
 - **Customizable Allergen Profiles**: Set up personalized allergen preferences for you and your family.
 - **RAG System**: Combines retrieval and generative AI for highly accurate allergen identification.
 - **Prompt Engineering**: For the best user experience and precise results.
-- **Seamless Food Recognition**: Detect and process various food items, even when multiple items are present.
+- **Seamless Food Recognition**: Detect and process various food items
 
 ---
 
