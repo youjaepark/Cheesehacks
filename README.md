@@ -30,11 +30,11 @@
 
 ### App Demonstration Video:
 
-### https://drive.google.com/file/d/1h_9aE87udB6FUpW1nJQdhezl0gvbsWQF/view?usp=sharing<br/><br/>
+### https://drive.google.com/file/d/1h_9aE87udB6FUpW1nJQdhezl0gvbsWQF/view?usp=sharing
 
 ### Presentation:
 
-### https://docs.google.com/presentation/d/14H5rwGxhoDALEETZ-2txu6fmpXHAyNMIxLE5XnGUnvI/edit?usp=sharing
+### https://docs.google.com/presentation/d/14H5rwGxhoDALEETZ-2txu6fmpXHAyNMIxLE5XnGUnvI/edit?usp=sharing<br/><br/>
 
 ### Experience the joy of food without the fear of allergies!
 
