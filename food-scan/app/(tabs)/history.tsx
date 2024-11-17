@@ -44,6 +44,9 @@ export default function HistoryScreen() {
   };
 
   useEffect(() => {
+    if (!Array.isArray(history)) {
+      setHistory([]);
+    }
     loadHistory();
   }, []);
 
@@ -54,6 +57,11 @@ export default function HistoryScreen() {
 
   const deleteHistoryItem = async (id: string, skipUndo = false) => {
     try {
+      if (!Array.isArray(history)) {
+        console.error("History is not an array:", history);
+        return;
+      }
+
       const itemToDelete = history.find((item) => item.id === id);
       const updatedHistory = history.filter((item) => item.id !== id);
 
@@ -63,6 +71,10 @@ export default function HistoryScreen() {
         setHistory(updatedHistory);
 
         // Set timeout for auto-commit delete
+        if (undoTimeout.current) {
+          clearTimeout(undoTimeout.current);
+        }
+
         undoTimeout.current = setTimeout(() => {
           commitDelete(updatedHistory);
           setDeletedItem(null);

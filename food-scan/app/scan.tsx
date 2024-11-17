@@ -11,7 +11,9 @@ import {
   ActivityIndicator,
   Alert,
 } from "react-native";
-import { saveToHistory } from "../utils/storage";
+import { saveToHistory, getUserAllergens } from "../utils/storage";
+import { MaterialIcons } from "@expo/vector-icons";
+import { COMMON_ALLERGENS } from "../utils/allergens";
 
 export default function ScanScreen() {
   const [permission, requestPermission] = useCameraPermissions();
@@ -65,6 +67,10 @@ export default function ScanScreen() {
     setIsFullScreen(false);
   };
 
+  const handleBack = () => {
+    router.back();
+  };
+
   const API_URL = `http://10.138.143.169:5000/identify`;
 
   const handleConfirm = async () => {
@@ -72,7 +78,8 @@ export default function ScanScreen() {
     setIsLoading(true);
 
     try {
-      setCamera(null);
+      const userAllergens = await getUserAllergens();
+      console.log("Sending user allergens:", userAllergens);
 
       const response = await fetch(API_URL, {
         method: "POST",
@@ -82,15 +89,21 @@ export default function ScanScreen() {
         },
         body: JSON.stringify({
           image_data: photo.base64,
+          user_allergens: userAllergens.filter((a) => a.enabled),
         }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(data.error || `HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
       console.log("Server response:", data);
+
+      if (!data.success) {
+        throw new Error(data.error || "Analysis failed");
+      }
 
       const analysisData = {
         foodName: data.food_name || "Unknown Food",
@@ -101,12 +114,10 @@ export default function ScanScreen() {
         warnings: data.warnings || [],
       };
 
-      // First close the scan modal and reset state
       await router.replace({
         pathname: "/(tabs)",
       });
 
-      // Then navigate to the result screen
       router.push({
         pathname: "/result",
         params: {
@@ -115,6 +126,9 @@ export default function ScanScreen() {
       });
     } catch (error) {
       console.error("API Error:", error);
+      Alert.alert("Error", "Failed to analyze the image. Please try again.", [
+        { text: "OK" },
+      ]);
 
       const errorData = {
         foodName: "Error",
@@ -125,12 +139,10 @@ export default function ScanScreen() {
         warnings: ["Failed to analyze the image. Please try again."],
       };
 
-      // First close the scan modal and reset state
       await router.replace({
         pathname: "/(tabs)",
       });
 
-      // Then navigate to the result screen with error data
       router.push({
         pathname: "/result",
         params: {
@@ -174,7 +186,17 @@ export default function ScanScreen() {
       {!photo ? (
         <CameraView style={styles.camera} ref={(ref) => setCamera(ref)}>
           <View style={styles.overlay}>
-            <Text style={styles.text}>Scan Your Food Item</Text>
+            <View style={styles.header}>
+              <TouchableOpacity
+                onPress={handleBack}
+                style={styles.backButton}
+                accessibilityLabel="Go back to Index Page"
+                accessibilityRole="button"
+              >
+                <MaterialIcons name="arrow-back" size={28} color="white" />
+              </TouchableOpacity>
+              <Text style={styles.text}>Scan Your Food Item</Text>
+            </View>
             <View style={styles.buttonContainer}>
               <TouchableOpacity style={styles.button} onPress={takePicture}>
                 <Text style={styles.buttonText}>Take Photo</Text>
@@ -269,5 +291,13 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
+  },
+  backButton: {
+    padding: 10,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingTop: 20,
   },
 });

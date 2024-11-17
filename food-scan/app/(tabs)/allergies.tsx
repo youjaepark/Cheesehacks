@@ -10,94 +10,79 @@ import {
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { COMMON_ALLERGENS } from "../../utils/constants";
-
-const ALLERGEN_STORAGE_KEY = "user_allergens";
+import { COMMON_ALLERGENS } from "../../utils/allergens";
+import {
+  saveUserAllergens,
+  getUserAllergens,
+  UserAllergen,
+} from "../../utils/storage";
 
 export default function AllergiesScreen() {
-  const [allergens, setAllergens] = useState(
-    COMMON_ALLERGENS.map((allergen) => ({ ...allergen, enabled: false }))
+  const [allergens, setAllergens] = useState<UserAllergen[]>(
+    COMMON_ALLERGENS.map((allergen) => ({
+      id: allergen.id,
+      name: allergen.name,
+      enabled: false,
+    }))
   );
-  const [customAllergens, setCustomAllergens] = useState<
-    Array<{ id: string; name: string; enabled: boolean }>
-  >([]);
-  const [customAllergen, setCustomAllergen] = useState("");
 
-  // Load saved allergens
   useEffect(() => {
     loadSavedAllergens();
   }, []);
 
   const loadSavedAllergens = async () => {
     try {
-      const saved = await AsyncStorage.getItem(ALLERGEN_STORAGE_KEY);
-      if (saved) {
-        const { common, custom } = JSON.parse(saved);
+      console.log("Loading saved allergens...");
+      const savedAllergens = await getUserAllergens();
+      console.log("Loaded allergens:", savedAllergens);
+
+      if (Array.isArray(savedAllergens) && savedAllergens.length > 0) {
+        setAllergens(savedAllergens);
+      } else {
+        console.log("Using default allergens");
         setAllergens(
           COMMON_ALLERGENS.map((allergen) => ({
-            ...allergen,
-            enabled: common.includes(allergen.id),
+            id: allergen.id,
+            name: allergen.name,
+            enabled: false,
           }))
         );
-        setCustomAllergens(custom || []);
       }
     } catch (error) {
       console.error("Error loading allergens:", error);
     }
   };
 
-  const saveAllergens = async () => {
-    try {
-      const data = {
-        common: allergens.filter((a) => a.enabled).map((a) => a.id),
-        custom: customAllergens,
-      };
-      await AsyncStorage.setItem(ALLERGEN_STORAGE_KEY, JSON.stringify(data));
-    } catch (error) {
-      console.error("Error saving allergens:", error);
-    }
-  };
-
-  const toggleAllergen = (index: number) => {
+  const toggleAllergen = async (index: number) => {
     const newAllergens = [...allergens];
     newAllergens[index].enabled = !newAllergens[index].enabled;
     setAllergens(newAllergens);
-    saveAllergens();
-  };
-
-  const addCustomAllergen = () => {
-    if (customAllergen.trim()) {
-      const newCustomAllergen = {
-        id: `custom-${Date.now()}`,
-        name: customAllergen.trim(),
-        enabled: true,
-      };
-      setCustomAllergens([...customAllergens, newCustomAllergen]);
-      setCustomAllergen("");
-      saveAllergens();
-    }
+    await saveUserAllergens(newAllergens);
   };
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.title}>Common Allergens</Text>
+      <Text style={styles.title}>My Allergens</Text>
       <Text style={styles.subtitle}>
-        Toggle the allergens you need to avoid
+        Toggle the allergens you need to avoid. We'll warn you when scanning
+        foods containing these ingredients.
       </Text>
 
       {allergens.map((allergen, index) => (
         <View key={allergen.id} style={styles.allergenItem}>
           <View style={styles.allergenInfo}>
+            <MaterialIcons
+              name={allergen.enabled ? "error-outline" : "check-circle-outline"}
+              size={24}
+              color={allergen.enabled ? "#FF6B6B" : "#4CAF50"}
+            />
             <Text style={styles.allergenText}>{allergen.name}</Text>
-            {allergen.enabled && (
-              <MaterialIcons name="warning" size={16} color="#FF6B6B" />
-            )}
           </View>
           <Switch
             value={allergen.enabled}
             onValueChange={() => toggleAllergen(index)}
-            trackColor={{ false: "#767577", true: "#81b0ff" }}
-            thumbColor={allergen.enabled ? "#4CAF50" : "#f4f3f4"}
+            trackColor={{ false: "#767577", true: "#FF6B6B" }}
+            thumbColor={allergen.enabled ? "#FF4444" : "#f4f3f4"}
           />
         </View>
       ))}

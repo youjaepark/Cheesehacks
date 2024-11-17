@@ -1,4 +1,10 @@
-export const COMMON_ALLERGENS = [
+export interface Allergen {
+  id: string;
+  name: string;
+  aliases: string[];
+}
+
+export const COMMON_ALLERGENS: Allergen[] = [
   {
     id: "milk",
     name: "Milk",

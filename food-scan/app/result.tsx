@@ -12,6 +12,7 @@ import { router } from "expo-router";
 import { Alert, TouchableOpacity } from "react-native";
 import { saveToHistory } from "../utils/storage";
 import { useState, useEffect } from "react";
+import { getUserAllergens, UserAllergen } from "../utils/storage";
 
 interface FoodAnalysis {
   foodName: string;
@@ -34,6 +35,8 @@ export default function ResultScreen() {
   const [hasSaved, setHasSaved] = useState(false);
   const params = useLocalSearchParams<{ data: string }>();
   const [analysis, setAnalysis] = useState<FoodAnalysis | null>(null);
+  const [userAllergens, setUserAllergens] = useState<UserAllergen[]>([]);
+  const [dangerousAllergens, setDangerousAllergens] = useState<string[]>([]);
 
   useEffect(() => {
     try {
@@ -45,6 +48,31 @@ export default function ResultScreen() {
       console.error("Error parsing analysis data:", error);
     }
   }, [params.data]);
+
+  useEffect(() => {
+    const checkForDangerousAllergens = async () => {
+      try {
+        const savedAllergens = await getUserAllergens();
+        setUserAllergens(savedAllergens);
+
+        const enabledAllergens = savedAllergens.filter((a) => a.enabled);
+
+        if (analysis?.allergens) {
+          const dangerous = analysis.allergens.filter((scannedAllergen) =>
+            enabledAllergens.some((userAllergen) =>
+              checkAllergenMatch(scannedAllergen, userAllergen)
+            )
+          );
+
+          setDangerousAllergens(dangerous);
+        }
+      } catch (error) {
+        console.error("Error checking allergens:", error);
+      }
+    };
+
+    checkForDangerousAllergens();
+  }, [analysis]);
 
   const handleCancel = () => {
     router.back();
@@ -108,6 +136,51 @@ export default function ResultScreen() {
     }
   };
 
+  const checkAllergenMatch = (
+    scannedAllergen: string,
+    userAllergen: UserAllergen
+  ): boolean => {
+    const scannedLower = scannedAllergen.toLowerCase();
+    const allergenLower = userAllergen.name.toLowerCase();
+
+    return (
+      scannedLower.includes(allergenLower) ||
+      allergenLower.includes(scannedLower) ||
+      (scannedLower.includes("nut") && allergenLower.includes("nut"))
+    );
+  };
+
+  const renderAllergenSection = () => (
+    <View style={styles.section}>
+      <Text style={styles.sectionTitle}>Allergen Information</Text>
+      {dangerousAllergens.length > 0 ? (
+        <View style={[styles.dangerContainer, { backgroundColor: "#FFE5E5" }]}>
+          <View style={styles.dangerHeader}>
+            <MaterialIcons name="warning" size={24} color="#D32F2F" />
+            <Text style={[styles.dangerText, { color: "#D32F2F" }]}>
+              ⚠️ WARNING: Contains allergens you're sensitive to!
+            </Text>
+          </View>
+          {dangerousAllergens.map((allergen, index) => (
+            <View key={index} style={styles.allergenItem}>
+              <MaterialIcons name="error-outline" size={20} color="#D32F2F" />
+              <Text style={[styles.allergenText, { color: "#D32F2F" }]}>
+                {allergen}
+              </Text>
+            </View>
+          ))}
+        </View>
+      ) : (
+        <View style={[styles.safeContainer, { backgroundColor: "#E8F5E9" }]}>
+          <MaterialIcons name="check-circle" size={24} color="#2E7D32" />
+          <Text style={[styles.safeText, { color: "#2E7D32" }]}>
+            No allergens detected that match your sensitivities
+          </Text>
+        </View>
+      )}
+    </View>
+  );
+
   return (
     <View style={styles.container}>
       <ScrollView style={styles.scrollContainer}>
@@ -151,21 +224,7 @@ export default function ResultScreen() {
           </View>
         )}
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Allergen Information</Text>
-          {hasAllergens ? (
-            <View style={styles.allergenList}>
-              {analysis.allergens.map((allergen, index) => (
-                <View key={index} style={styles.allergenItem}>
-                  <MaterialIcons name="warning" size={24} color="#FF6B6B" />
-                  <Text style={styles.allergenText}>{allergen}</Text>
-                </View>
-              ))}
-            </View>
-          ) : (
-            <Text style={styles.safeText}>No common allergens detected</Text>
-          )}
-        </View>
+        {renderAllergenSection()}
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Ingredients</Text>
@@ -249,10 +308,11 @@ const styles = StyleSheet.create({
   allergenItem: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFF5F5",
-    padding: 10,
+    backgroundColor: "#FFF",
+    padding: 12,
     borderRadius: 8,
-    gap: 10,
+    marginTop: 8,
+    gap: 8,
   },
   allergenText: {
     fontSize: 16,
@@ -334,5 +394,32 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "600",
+  },
+  dangerContainer: {
+    backgroundColor: "#FFE5E5",
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#FFB8B8",
+    marginTop: 8,
+  },
+  safeContainer: {
+    backgroundColor: "#E8F5E9",
+    padding: 16,
+    borderRadius: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  dangerHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+    gap: 8,
+  },
+  dangerText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    flex: 1,
   },
 });
