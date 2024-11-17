@@ -30,30 +30,24 @@ export const saveToHistory = async (analysisData: {
   ingredients: string[];
   imageUrl?: string;
   confidenceLevel?: string;
+  matchedAllergens?: string[];
 }) => {
   try {
-    // Get existing history
     const existingHistory = await getHistory();
 
-    // Create new history item
     const newItem: HistoryItem = {
       id: Date.now().toString(),
       productName: analysisData.foodName,
       date: new Date().toISOString(),
-      safe: analysisData.allergens.length === 0,
-      allergens: analysisData.allergens,
+      safe: !analysisData.matchedAllergens?.length,
+      allergens: analysisData.matchedAllergens || [],
       ingredients: analysisData.ingredients,
       imageUrl: analysisData.imageUrl,
       confidenceLevel: analysisData.confidenceLevel,
     };
 
-    // Add new item to the beginning of the array
     const updatedHistory = [newItem, ...existingHistory];
-
-    // Keep only the last 50 items
     const trimmedHistory = updatedHistory.slice(0, 50);
-
-    // Save to storage
     await AsyncStorage.setItem(HISTORY_KEY, JSON.stringify(trimmedHistory));
 
     return newItem;

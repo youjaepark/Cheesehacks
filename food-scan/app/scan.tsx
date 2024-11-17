@@ -156,13 +156,14 @@ export default function ScanScreen() {
 
   const renderPreviewContent = () => (
     <View style={styles.previewContainer}>
-      <Image source={{ uri: photo?.uri }} style={styles.preview} />
-      {isLoading ? (
-        <View style={styles.loadingContainer}>
+      {isLoading && (
+        <View style={styles.loadingOverlay}>
           <ActivityIndicator size="large" color="#4CAF50" />
           <Text style={styles.loadingText}>Analyzing image...</Text>
         </View>
-      ) : (
+      )}
+      <Image source={{ uri: photo?.uri }} style={styles.preview} />
+      {!isLoading && (
         <View style={styles.buttonGroup}>
           <TouchableOpacity
             style={[styles.button, styles.buttonSecondary]}
@@ -193,13 +194,16 @@ export default function ScanScreen() {
                 accessibilityLabel="Go back to Index Page"
                 accessibilityRole="button"
               >
-                <MaterialIcons name="arrow-back" size={28} color="white" />
+                <MaterialIcons name="arrow-back" size={32} color="white" />
               </TouchableOpacity>
-              <Text style={styles.text}>Scan Your Food Item</Text>
+              <Text style={styles.headerText}>Scan Your Food</Text>
             </View>
             <View style={styles.buttonContainer}>
-              <TouchableOpacity style={styles.button} onPress={takePicture}>
-                <Text style={styles.buttonText}>Take Photo</Text>
+              <TouchableOpacity
+                style={styles.captureButton}
+                onPress={takePicture}
+              >
+                <MaterialIcons name="camera-alt" size={32} color="white" />
               </TouchableOpacity>
             </View>
           </View>
@@ -227,27 +231,44 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "transparent",
     justifyContent: "space-between",
-    padding: 20,
   },
-  buttonContainer: {
+  header: {
     flexDirection: "row",
-    justifyContent: "center",
-    marginBottom: 30,
-  },
-  button: {
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    padding: 15,
-    borderRadius: 10,
     alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    position: "absolute",
+    top: 50,
+    left: 0,
+    right: 0,
+    backgroundColor: "transparent",
   },
-  text: {
-    fontSize: 24,
-    fontWeight: "bold",
+  backButton: {
+    width: 48,
+    height: 28,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "transparent",
+  },
+  headerText: {
+    fontSize: 20,
+    fontWeight: "600",
     color: "white",
+    flex: 1,
     textAlign: "center",
-    marginTop: 30,
+    marginRight: 50,
+    marginTop: 1,
   },
-  buttonText: {
+  captureButton: {
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    padding: 20,
+    borderRadius: 35,
+    alignItems: "center",
+    justifyContent: "center",
+    width: 70,
+    height: 70,
+  },
+  captureText: {
     fontSize: 18,
     color: "white",
     fontWeight: "bold",
@@ -262,17 +283,25 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 20,
   },
-  loadingContainer: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "center",
+  loadingOverlay: {
+    position: "absolute",
+    top: 40,
+    left: 0,
+    right: 0,
+    zIndex: 1,
     alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+    gap: 10,
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    padding: 15,
+    margin: 20,
+    borderRadius: 10,
   },
   loadingText: {
     fontSize: 18,
     fontWeight: "bold",
     color: "white",
-    marginTop: 10,
   },
   buttonGroup: {
     flexDirection: "row",
@@ -292,12 +321,21 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
   },
-  backButton: {
-    padding: 10,
-  },
-  header: {
-    flexDirection: "row",
+  buttonContainer: {
+    position: "absolute",
+    bottom: 40,
+    width: "100%",
     alignItems: "center",
-    paddingTop: 20,
+  },
+  buttonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  button: {
+    padding: 15,
+    borderRadius: 8,
+    flex: 0.48,
+    alignItems: "center",
   },
 });

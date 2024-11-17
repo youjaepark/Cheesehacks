@@ -17,10 +17,17 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const HISTORY_KEY = "scan_history";
 
-const getConfidenceColor = (confidence: number): string => {
-  if (confidence >= 0.8) return "#4CAF50"; // Green
-  if (confidence >= 0.6) return "#FFA726"; // Orange
-  return "#FF5252"; // Red
+const getConfidenceColor = (confidence: string): string => {
+  switch (confidence.toLowerCase()) {
+    case "high":
+      return "#4CAF50"; // Green
+    case "mid":
+      return "#FFA726"; // Yellow
+    case "low":
+      return "#FF5252"; // Red
+    default:
+      return "#FF5252"; // Default to Red for unknown values
+  }
 };
 
 export default function HistoryScreen() {
@@ -159,23 +166,30 @@ export default function HistoryScreen() {
           <Text
             style={[
               styles.confidence,
-              { color: getConfidenceColor(Number(item.confidenceLevel)) },
+              { color: getConfidenceColor(item.confidenceLevel) },
             ]}
           >
             Confidence: {item.confidenceLevel}
           </Text>
         )}
 
-        {item.allergens.length > 0 && (
-          <View style={styles.allergenContainer}>
-            <Text style={styles.allergenTitle}>Found allergens:</Text>
-            {item.allergens.map((allergen) => (
-              <Text key={allergen} style={styles.allergen}>
-                • {allergen}
-              </Text>
-            ))}
-          </View>
-        )}
+        <View style={styles.allergenContainer}>
+          {item.safe ? (
+            <View style={styles.safeContainer}>
+              <MaterialIcons name="check-circle" size={20} color="#4CAF50" />
+              <Text style={styles.safeText}>No allergens detected</Text>
+            </View>
+          ) : (
+            <>
+              <Text style={styles.allergenTitle}>Found allergens:</Text>
+              {item.allergens.map((allergen) => (
+                <Text key={allergen} style={styles.allergen}>
+                  • {allergen}
+                </Text>
+              ))}
+            </>
+          )}
+        </View>
       </View>
     </Swipeable>
   );
@@ -249,17 +263,22 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   allergenContainer: {
-    marginTop: 10,
+    marginTop: 12,
+    backgroundColor: "#FFF",
+    borderRadius: 8,
+    padding: 12,
   },
   allergenTitle: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#333",
-    marginBottom: 5,
+    color: "#FF5252",
+    marginBottom: 8,
   },
   allergen: {
     color: "#FF5252",
     marginLeft: 10,
+    fontSize: 14,
+    marginBottom: 4,
   },
   confidence: {
     fontSize: 14,
@@ -325,5 +344,19 @@ const styles = StyleSheet.create({
     color: "#4CAF50",
     fontSize: 14,
     fontWeight: "bold",
+  },
+  safeContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: "#E8F5E9",
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 8,
+  },
+  safeText: {
+    color: "#4CAF50",
+    fontSize: 14,
+    fontWeight: "500",
   },
 });

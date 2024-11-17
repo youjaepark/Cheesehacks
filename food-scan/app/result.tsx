@@ -91,6 +91,7 @@ export default function ResultScreen() {
         ingredients: analysis.ingredients,
         imageUrl: analysis.imageUrl,
         confidenceLevel: analysis.confidenceLevel,
+        matchedAllergens: dangerousAllergens,
       });
 
       setHasSaved(true);
@@ -158,7 +159,7 @@ export default function ResultScreen() {
           <View style={styles.dangerHeader}>
             <MaterialIcons name="warning" size={24} color="#D32F2F" />
             <Text style={[styles.dangerText, { color: "#D32F2F" }]}>
-              ⚠️ WARNING: Contains allergens you're sensitive to!
+              WARNING: This food might contain allergens you're sensitive to:
             </Text>
           </View>
           {dangerousAllergens.map((allergen, index) => (

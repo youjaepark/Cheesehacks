@@ -7,7 +7,7 @@ export default function Index() {
   const openCamera = async () => {
     const { status } = await Camera.requestCameraPermissionsAsync();
     if (status === "granted") {
-      router.push("/scan"); // This should now work correctly
+      router.push("/scan");
     } else {
       alert("Camera permission is required to scan food items");
     }
@@ -15,14 +15,40 @@ export default function Index() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Food Allergy Scanner</Text>
+      <Text style={styles.title}>Welcome to AllerView!</Text>
 
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button} onPress={openCamera}>
-          <MaterialIcons name="camera-alt" size={32} color="#FFF" />
-          <Text style={styles.buttonText}>Scan Food</Text>
-        </TouchableOpacity>
+      <Text style={styles.subtitle}>Your ultimate food safety companion</Text>
+
+      <View style={styles.featuresContainer}>
+        <View style={styles.featureItem}>
+          <Text style={styles.featureIcon}>🔍</Text>
+          <Text style={styles.featureTitle}>Personalized Setting</Text>
+          <Text style={styles.featureText}>
+            Input your allergies once for tailored alerts
+          </Text>
+        </View>
+
+        <View style={styles.featureItem}>
+          <Text style={styles.featureIcon}>📸</Text>
+          <Text style={styles.featureTitle}>Effortless Scanning</Text>
+          <Text style={styles.featureText}>
+            Snap a photo and get instant insights
+          </Text>
+        </View>
+
+        <View style={styles.featureItem}>
+          <Text style={styles.featureIcon}>✨</Text>
+          <Text style={styles.featureTitle}>Peace of Mind</Text>
+          <Text style={styles.featureText}>
+            Receive immediate allergen alerts
+          </Text>
+        </View>
       </View>
+
+      <TouchableOpacity style={styles.scanButton} onPress={openCamera}>
+        <MaterialIcons name="camera-alt" size={40} color="#FFF" />
+        <Text style={styles.scanButtonText}>Scan Now</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -34,23 +60,55 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   title: {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: "bold",
     textAlign: "center",
-    marginTop: 40,
-    marginBottom: 40,
-    color: "#333",
+    marginTop: 10,
+    color: "#2E7D32",
   },
-  buttonContainer: {
+  subtitle: {
+    fontSize: 18,
+    textAlign: "center",
+    marginTop: 10,
+    marginBottom: 30,
+    color: "#555",
+  },
+  featuresContainer: {
+    flex: 1,
     gap: 20,
   },
-  button: {
-    backgroundColor: "#4CAF50",
-    padding: 20,
+  featureItem: {
+    backgroundColor: "#F5F5F5",
     borderRadius: 12,
-    flexDirection: "row",
+    padding: 20,
     alignItems: "center",
-    gap: 15,
+  },
+  featureIcon: {
+    fontSize: 32,
+    marginBottom: 10,
+  },
+  featureTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: 5,
+    color: "#333",
+  },
+  featureText: {
+    fontSize: 16,
+    textAlign: "center",
+    color: "#666",
+  },
+  scanButton: {
+    position: "absolute",
+    bottom: 20,
+    alignSelf: "center",
+    backgroundColor: "#4CAF50",
+    width: 160,
+    height: 60,
+    borderRadius: 30,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
     elevation: 3,
     shadowColor: "#000",
     shadowOffset: {
@@ -60,9 +118,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
   },
-  buttonText: {
+  scanButtonText: {
     color: "#FFF",
     fontSize: 18,
     fontWeight: "600",
+    marginLeft: 10,
   },
 });
