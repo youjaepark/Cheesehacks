@@ -4,45 +4,47 @@
 
 <h1 align="center">AllerView</h1>
 
-### Never worry about hidden ingredients again. AllerView is your personal food safety assistant, using advanced AI to help you make confident dining decisions in seconds.<br/>
+**Experience Food Safely with AllerView**  
+Never worry about hidden ingredients again! AllerView is your personal food safety assistant, powered by advanced AI to help you make confident dining decisions in seconds.
 
-### 🔍 Simply input your allergies once
+---
 
-### 📸 Snap a photo of your food
+## 🚀 Key Features:
+- **Real-Time Allergen Detection**: Instantly analyze food for potential allergens.
+- **Customizable Allergen Profiles**: Set up personalized allergen preferences for you and your family.
+- **RAG System**: Combines retrieval and generative AI for highly accurate allergen identification.
+- **Prompt Engineering**: For the best user experience and precise results.
+- **Seamless Food Recognition**: Detect and process various food items, even when multiple items are present.
 
-### ✨ And get instant allergen alerts<br/><br/>
+---
 
-### Key Features:
+## 🌟 Technical Overview:
 
-### - Real-time allergen detection from photos
+1. **Image Detection**  
+   Using **Transfer Learning** from OpenAI models, AllerView accurately identifies food items and potential allergens.
 
-### - Customizable allergen profiles for multiple family members
+2. **RAG System**  
+   Our **Retrieval-Augmented Generation (RAG)** system improves accuracy by using similarity-based models to find relevant food items and allergens.
 
-### - RAG combines the power of retrieval and generative systems to improve our accuracy
+3. **Database**  
+   Powered by **MongoDB**, ensuring fast and reliable data storage for real-time allergen detection.
 
-### - Prompt engineering and further fine tuning to give the best experience possible<br/><br/>
+4. **Frontend & App**  
+   Built with **React Native** for cross-platform compatibility, combining TypeScript (frontend), Python (backend), and MongoDB (database).
 
-### 1) Image Detection - Using Transfer Learning from ChatGPT for our image detection, we are able to detect and process a variety of food items even when there are multiple involved!
+---
 
-### 2) Database - For our Database we opted for MongoDB, giving us quick and easy access to our data, so we can use our RAG system effectively
+## 📽️ Demonstrations:
 
-### 3) RAG - With transfer learning from OpenAI we created a "Similarity LLM" which gives us similar food items and its allergens to improve the results
+- **App Video Demonstration**:  
+  [Watch Here](https://drive.google.com/file/d/1h_9aE87udB6FUpW1nJQdhezl0gvbsWQF/view?usp=sharing)  
 
-### 4) Frontend/App creation - For our frontend and app creation we used React Native to make the app compatible with your phone for quick and convenient use
+- **Presentation**:  
+  [View Presentation](https://docs.google.com/presentation/d/14H5rwGxhoDALEETZ-2txu6fmpXHAyNMIxLE5XnGUnvI/edit?usp=sharing)
 
-### (Frontend with TypeScript, Backend with Python, and MQL for Database)
+---
 
-### App Demonstration Video:
-
-### https://drive.google.com/file/d/1h_9aE87udB6FUpW1nJQdhezl0gvbsWQF/view?usp=sharing
-
-### Presentation:
-
-### https://docs.google.com/presentation/d/14H5rwGxhoDALEETZ-2txu6fmpXHAyNMIxLE5XnGUnvI/edit?usp=sharing<br/><br/>
-
-### Experience the joy of food without the fear of allergies!
-
-## How to Run
+## 🛠️ How to Run AllerView
 
 ### Prerequisites
 
