@@ -5,6 +5,7 @@ from flask import request, jsonify
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import json
+import mariadb
 
 app = Flask(__name__)
 CORS(app)
@@ -97,9 +98,24 @@ def identify_objects(base64_image, user_allergens):
             # Parse JSON with better error handling
             try:
                 result = json.loads(content)
-                return {
+                conn = mariadb.connect(
+                    user="djain",   
+                    password="cheesehacks", 
+                    host="localhost",    
+                    database="cheesehacks"     
+                )
+
+                cursor = conn.cursor()
+                cursor.execute("SELECT * FROM foodallergy")
+                allergens = None
+                for row in cursor:
+                    if(result.get("food_name") == row[0]){
+                        allergens =  jsonify(row[5])
+                conn.close()
+                 return {
                     "success": True,
                     "food_name": result.get("food_name", "Unknown Food"),
+                    "allergens": allergens
                     "potential_allergens": result.get("potential_allergens", []),
                     "likely_ingredients": result.get("likely_ingredients", []),
                     "confidence_level": result.get("confidence_level", "low"),
@@ -116,7 +132,9 @@ def identify_objects(base64_image, user_allergens):
                     "confidence_level": "low",
                     "warnings": ["Unable to analyze image properly"]
                 }
-                
+            except mariadb.Error as e:
+                print("No valid database")
+      
         except (AttributeError, IndexError) as e:
             print(f"Error processing OpenAI response: {str(e)}")
             return {
@@ -127,6 +145,7 @@ def identify_objects(base64_image, user_allergens):
                 "confidence_level": "low",
                 "warnings": ["Error processing API response"]
             }
+            
             
     except Exception as e:
         print(f"OpenAI API error: {str(e)}")
