@@ -31,10 +31,8 @@ def identify_item():
             
         base64_string = data['image_data']
         user_allergens = data.get('user_allergens', [])
-        print("Received user allergens:", user_allergens)  # Debug logging
         
         analysis_result = identify_objects(base64_string, user_allergens)
-        print("Analysis result:", analysis_result)  # Debug logging
         
         return jsonify(analysis_result)
             
@@ -59,8 +57,6 @@ def identify_objects(base64_image, user_allergens):
     
     # Format context from similar items
     context = format_context_from_similar_items(similar_items)
-    print(f"Formatted context length: {len(context)} characters")
-    print("Sample context:", context[:200] + "..." if len(context) > 200 else context)
     
     # Format user allergens properly
     allergen_names = [a.get('name', '') for a in user_allergens if a.get('enabled', False)]
@@ -183,13 +179,6 @@ def retrieve_similar_items(collection, user_allergens):
     }).limit(5)
     
     results = list(similar_items)
-    retrieval_time = (datetime.now() - start_time).total_seconds()
-    
-    print(f"RAG Metrics:")
-    print(f"- Retrieval time: {retrieval_time:.2f} seconds")
-    print(f"- Retrieved documents: {len(results)}")
-    print(f"- Matching allergens: {allergen_names}")
-    
     return results
 
 def format_context_from_similar_items(similar_items):

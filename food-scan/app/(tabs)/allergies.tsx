@@ -32,14 +32,11 @@ export default function AllergiesScreen() {
 
   const loadSavedAllergens = async () => {
     try {
-      console.log("Loading saved allergens...");
       const savedAllergens = await getUserAllergens();
-      console.log("Loaded allergens:", savedAllergens);
 
       if (Array.isArray(savedAllergens) && savedAllergens.length > 0) {
         setAllergens(savedAllergens);
       } else {
-        console.log("Using default allergens");
         setAllergens(
           COMMON_ALLERGENS.map((allergen) => ({
             id: allergen.id,
