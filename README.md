@@ -19,3 +19,6 @@
 ### (Frontend with TypeScript, Backend with Python, and MQL for Database)<br/><br/>
 
 ### Experience the joy of food without the fear of allergies!
+
+### Demonstration Video: 
+### https://drive.google.com/file/d/1h_9aE87udB6FUpW1nJQdhezl0gvbsWQF/view?usp=sharing
