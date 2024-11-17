@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
   Alert,
 } from "react-native";
+import { saveToHistory } from "../utils/storage";
 
 export default function ScanScreen() {
   const [permission, requestPermission] = useCameraPermissions();
@@ -19,6 +20,7 @@ export default function ScanScreen() {
   );
   const [camera, setCamera] = useState<CameraView | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isFullScreen, setIsFullScreen] = useState(false);
 
   useEffect(() => {
     requestPermission();
@@ -36,6 +38,7 @@ export default function ScanScreen() {
   }
 
   const takePicture = async () => {
+    setIsFullScreen(true);
     if (camera) {
       try {
         const photo = await camera.takePictureAsync({
@@ -45,14 +48,21 @@ export default function ScanScreen() {
         });
         if (!photo?.base64) {
           Alert.alert("Error", "Failed to capture photo");
+          setIsFullScreen(false);
           return;
         }
         setPhoto({ uri: photo.uri, base64: photo.base64 });
       } catch (error) {
         Alert.alert("Error", "Failed to capture photo");
         console.error("Camera error:", error);
+        setIsFullScreen(false);
       }
     }
+  };
+
+  const handleRetake = () => {
+    setPhoto(null);
+    setIsFullScreen(false);
   };
 
   const API_URL = `http://10.138.143.169:5000/identify`;
@@ -62,7 +72,7 @@ export default function ScanScreen() {
     setIsLoading(true);
 
     try {
-      console.log("Making API request to:", API_URL);
+      setCamera(null);
 
       const response = await fetch(API_URL, {
         method: "POST",
@@ -75,52 +85,58 @@ export default function ScanScreen() {
         }),
       });
 
-      const responseText = await response.text();
-      console.log("Raw response:", responseText);
-
-      let data;
-      try {
-        data = JSON.parse(responseText);
-        console.log("Parsed response data:", data);
-      } catch (parseError) {
-        throw new Error(`Invalid JSON response: ${responseText}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      if (!data.success) {
-        throw new Error(data.error || "Analysis failed");
-      }
+      const data = await response.json();
+      console.log("Server response:", data);
 
       const analysisData = {
         foodName: data.food_name || "Unknown Food",
-        allergens: Array.isArray(data.potential_allergens)
-          ? data.potential_allergens
-          : [],
-        ingredients: Array.isArray(data.likely_ingredients)
-          ? data.likely_ingredients
-          : [],
+        allergens: data.potential_allergens || [],
+        ingredients: data.likely_ingredients || [],
         imageUrl: photo.uri,
         confidenceLevel: data.confidence_level || "low",
-        warnings: Array.isArray(data.warnings) ? data.warnings : [],
+        warnings: data.warnings || [],
       };
 
+      // First close the scan modal and reset state
+      await router.replace({
+        pathname: "/(tabs)",
+      });
+
+      // Then navigate to the result screen
       router.push({
-        pathname: "/(tabs)/result",
+        pathname: "/result",
         params: {
           data: JSON.stringify(analysisData),
         },
       });
     } catch (error) {
-      console.error("API Error Details:", {
-        error: error instanceof Error ? error.message : "Unknown error",
-        stack: error instanceof Error ? error.stack : undefined,
+      console.error("API Error:", error);
+
+      const errorData = {
+        foodName: "Error",
+        allergens: [],
+        ingredients: [],
+        imageUrl: photo.uri,
+        confidenceLevel: "low",
+        warnings: ["Failed to analyze the image. Please try again."],
+      };
+
+      // First close the scan modal and reset state
+      await router.replace({
+        pathname: "/(tabs)",
       });
 
-      Alert.alert(
-        "Error",
-        error instanceof Error
-          ? `Analysis failed: ${error.message}`
-          : "Failed to analyze the image. Please try again."
-      );
+      // Then navigate to the result screen with error data
+      router.push({
+        pathname: "/result",
+        params: {
+          data: JSON.stringify(errorData),
+        },
+      });
     } finally {
       setIsLoading(false);
     }
@@ -138,7 +154,7 @@ export default function ScanScreen() {
         <View style={styles.buttonGroup}>
           <TouchableOpacity
             style={[styles.button, styles.buttonSecondary]}
-            onPress={() => setPhoto(null)}
+            onPress={handleRetake}
           >
             <Text style={styles.buttonText}>Retake</Text>
           </TouchableOpacity>
@@ -154,7 +170,7 @@ export default function ScanScreen() {
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, isFullScreen && styles.fullScreen]}>
       {!photo ? (
         <CameraView style={styles.camera} ref={(ref) => setCamera(ref)}>
           <View style={styles.overlay}>
@@ -246,5 +262,12 @@ const styles = StyleSheet.create({
   },
   buttonPrimary: {
     backgroundColor: "#4CAF50",
+  },
+  fullScreen: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
 });

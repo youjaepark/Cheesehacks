@@ -49,33 +49,19 @@ def identify_objects(base64_image):
     openai.api_key = os.getenv("OPENAI_API_KEY")
     
     system_prompt = """You are an expert at identifying food items and their potential allergens. 
-    Analyze the food image and provide detailed information including:
-    1. Specific food name (be as precise as possible)
-    2. Common allergens present (check for: dairy, eggs, wheat, soy, nuts, fish, shellfish)
-    3. Likely ingredients based on visual inspection
-    4. Confidence level of the analysis
-
-    For this pizza image, be sure to check for:
-    - Dairy (cheese)
-    - Wheat (crust)
-    - Potential meat toppings
-    - Vegetables
-
-    Always return the response in this JSON format:
+    Analyze the food image and respond with ONLY a JSON object containing:
     {
-        "food_name": "specific name of food",
+        "food_name": "name of the food",
         "potential_allergens": ["allergen1", "allergen2"],
         "likely_ingredients": ["ingredient1", "ingredient2"],
         "confidence_level": "high/medium/low",
-        "warnings": ["warning1", "warning2"]
+        "warnings": ["any important warnings"]
     }"""
 
-    user_prompt = "Please analyze this food image and provide a detailed JSON response with the food name, potential allergens, likely ingredients, confidence level, and any warnings."
-    
     try:
         client = openai.OpenAI()
         response = client.chat.completions.create(
-            model="gpt-4o-mini", 
+            model="gpt-4o-mini",
             messages=[
                 {
                     "role": "system",
@@ -84,55 +70,57 @@ def identify_objects(base64_image):
                 {
                     "role": "user",
                     "content": [
-                        {"type": "text", "text": user_prompt},
                         {
                             "type": "image_url",
                             "image_url": {
                                 "url": f"data:image/jpeg;base64,{base64_image}"
                             }
-                        },
-                    ],
+                        }
+                    ]
                 }
             ],
-            max_tokens=500
+            max_tokens=1000,
+            temperature=0.2
         )
         
-        # Parse the response content
+        # Get the raw content
         content = response.choices[0].message.content
+        print("Raw OpenAI Response:", content)
+        
+        # Clean up the response by removing markdown code blocks if present
+        if content.startswith('```'):
+            content = content.split('```')[1]
+            if content.startswith('json'):
+                content = content[4:]
+        
+        content = content.strip()
+        
         try:
             result = json.loads(content)
-            # Ensure all required fields exist with proper defaults
-            return {
-                "food_name": result.get("food_name", "Pizza"),  # Default to Pizza if uncertain
-                "potential_allergens": result.get("potential_allergens", ["Wheat", "Dairy"]),  # Common pizza allergens
-                "likely_ingredients": result.get("likely_ingredients", [
-                    "Pizza dough", 
-                    "Mozzarella cheese",
-                    "Tomato sauce",
-                    "Bell peppers",
-                    "Mushrooms"
-                ]),
-                "confidence_level": result.get("confidence_level", "medium"),
-                "warnings": result.get("warnings", ["Contains common allergens: wheat and dairy"])
+            response_data = {
+                "success": True,
+                "food_name": result["food_name"],
+                "potential_allergens": result["potential_allergens"],
+                "likely_ingredients": result["likely_ingredients"],
+                "confidence_level": result["confidence_level"],
+                "warnings": result["warnings"]
             }
-        except json.JSONDecodeError:
-            # Fallback response for pizza
+            print("Processed response:", response_data)
+            return response_data
+            
+        except json.JSONDecodeError as e:
+            print(f"JSON parsing error: {str(e)}")
+            print(f"Raw content: {content}")
             return {
-                "food_name": "Pizza",
-                "potential_allergens": ["Wheat", "Dairy"],
-                "likely_ingredients": [
-                    "Pizza dough", 
-                    "Mozzarella cheese",
-                    "Tomato sauce",
-                    "Bell peppers",
-                    "Mushrooms"
-                ],
-                "confidence_level": "medium",
-                "warnings": ["Contains common allergens: wheat and dairy"]
+                "food_name": "Unknown Food",
+                "potential_allergens": [],
+                "likely_ingredients": [],
+                "confidence_level": "low",
+                "warnings": ["Unable to analyze image properly"]
             }
             
     except Exception as e:
-        print(f"Error in identify_objects: {str(e)}")  # Add logging
+        print(f"OpenAI API error: {str(e)}")
         return {
             "food_name": "Error",
             "potential_allergens": [],

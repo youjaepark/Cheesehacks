@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,47 +9,90 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { COMMON_ALLERGENS } from "../../utils/constants";
 
-const DEFAULT_ALLERGENS = [
-  "Peanuts",
-  "Tree Nuts",
-  "Milk",
-  "Eggs",
-  "Fish",
-  "Shellfish",
-  "Soy",
-  "Wheat",
-];
+const ALLERGEN_STORAGE_KEY = "user_allergens";
 
 export default function AllergiesScreen() {
   const [allergens, setAllergens] = useState(
-    DEFAULT_ALLERGENS.map((allergen) => ({ name: allergen, enabled: false }))
+    COMMON_ALLERGENS.map((allergen) => ({ ...allergen, enabled: false }))
   );
+  const [customAllergens, setCustomAllergens] = useState<
+    Array<{ id: string; name: string; enabled: boolean }>
+  >([]);
   const [customAllergen, setCustomAllergen] = useState("");
+
+  // Load saved allergens
+  useEffect(() => {
+    loadSavedAllergens();
+  }, []);
+
+  const loadSavedAllergens = async () => {
+    try {
+      const saved = await AsyncStorage.getItem(ALLERGEN_STORAGE_KEY);
+      if (saved) {
+        const { common, custom } = JSON.parse(saved);
+        setAllergens(
+          COMMON_ALLERGENS.map((allergen) => ({
+            ...allergen,
+            enabled: common.includes(allergen.id),
+          }))
+        );
+        setCustomAllergens(custom || []);
+      }
+    } catch (error) {
+      console.error("Error loading allergens:", error);
+    }
+  };
+
+  const saveAllergens = async () => {
+    try {
+      const data = {
+        common: allergens.filter((a) => a.enabled).map((a) => a.id),
+        custom: customAllergens,
+      };
+      await AsyncStorage.setItem(ALLERGEN_STORAGE_KEY, JSON.stringify(data));
+    } catch (error) {
+      console.error("Error saving allergens:", error);
+    }
+  };
 
   const toggleAllergen = (index: number) => {
     const newAllergens = [...allergens];
     newAllergens[index].enabled = !newAllergens[index].enabled;
     setAllergens(newAllergens);
+    saveAllergens();
   };
 
   const addCustomAllergen = () => {
     if (customAllergen.trim()) {
-      setAllergens([
-        ...allergens,
-        { name: customAllergen.trim(), enabled: true },
-      ]);
+      const newCustomAllergen = {
+        id: `custom-${Date.now()}`,
+        name: customAllergen.trim(),
+        enabled: true,
+      };
+      setCustomAllergens([...customAllergens, newCustomAllergen]);
       setCustomAllergen("");
+      saveAllergens();
     }
   };
 
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.title}>Common Allergens</Text>
+      <Text style={styles.subtitle}>
+        Toggle the allergens you need to avoid
+      </Text>
 
       {allergens.map((allergen, index) => (
-        <View key={allergen.name} style={styles.allergenItem}>
-          <Text style={styles.allergenText}>{allergen.name}</Text>
+        <View key={allergen.id} style={styles.allergenItem}>
+          <View style={styles.allergenInfo}>
+            <Text style={styles.allergenText}>{allergen.name}</Text>
+            {allergen.enabled && (
+              <MaterialIcons name="warning" size={16} color="#FF6B6B" />
+            )}
+          </View>
           <Switch
             value={allergen.enabled}
             onValueChange={() => toggleAllergen(index)}
@@ -58,19 +101,6 @@ export default function AllergiesScreen() {
           />
         </View>
       ))}
-
-      <Text style={styles.title}>Add Custom Allergen</Text>
-      <View style={styles.addContainer}>
-        <TextInput
-          style={styles.input}
-          value={customAllergen}
-          onChangeText={setCustomAllergen}
-          placeholder="Enter allergen name"
-        />
-        <TouchableOpacity style={styles.addButton} onPress={addCustomAllergen}>
-          <MaterialIcons name="add" size={24} color="#FFF" />
-        </TouchableOpacity>
-      </View>
     </ScrollView>
   );
 }
@@ -119,5 +149,15 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     justifyContent: "center",
     alignItems: "center",
+  },
+  subtitle: {
+    fontSize: 14,
+    color: "#666",
+    marginBottom: 15,
+  },
+  allergenInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
   },
 });
