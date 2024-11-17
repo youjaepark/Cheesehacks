@@ -1,4 +1,4 @@
-                                                                 AllerView 
+                                                          AllerView 
 ### Never worry about hidden ingredients again. AllerView is your personal food safety assistant, using advanced AI to help you make confident dining decisions in seconds.<br/>
 
 ### 🔍 Simply input your allergies once
