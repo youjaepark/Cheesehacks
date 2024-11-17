@@ -1,4 +1,8 @@
-                                                    AllerView
+<p align="center">
+  <img src="food-scan/assets/images/AllerView_icon.png" alt="AllerView Logo" width="200" height="200"/>
+</p>
+
+<h1 align="center">AllerView</h1>
 
 ### Never worry about hidden ingredients again. AllerView is your personal food safety assistant, using advanced AI to help you make confident dining decisions in seconds.<br/>
 
@@ -75,7 +79,7 @@ npm install
 3. Install Python backend dependencies:
 
 ```bash
-cd ../backend
+cd ../server
 pip install -r requirements.txt
 ```
 
@@ -89,15 +93,15 @@ pip install -r requirements.txt
 1. Start the backend server:
 
 ```bash
-cd backend
-python app.py
+cd server
+python server.py
 ```
 
 2. Start the Expo development server:
 
 ```bash
 cd food-scan
-npm start
+npx expo start
 ```
 
 3. Launch the app:

@@ -1,0 +1,9 @@
+pywatchman==2.0.0
+wheel @ file:///opt/homebrew/Cellar/python%403.13/3.13.0_1/libexec/wheel-0.44.0-py3-none-any.whl#sha256=f49b82715dce6365f75eddcb0a9bb47d0d46feaf14bbc739dfcbd677b7073f5b
+flask==3.0.2
+flask-cors==4.0.0
+python-dotenv==1.0.1
+openai==1.12.0
+pymongo==4.6.1
+scikit-learn==1.4.1.post1
+certifi==2024.2.2
