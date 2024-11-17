@@ -14,7 +14,7 @@
 
 ### 1) Image Detection - Using Transfer Learning from ChatGPT for our image detection, we are able to detect and process a variety of food items even when there are multiple involved! 
 ### 2) Database - For our Database we opted for MongoDB, giving us quick and easy access to our data, so we can use our RAG system effectively
-### 3) RAG - With transfer learning from OpenAI we created a "similarity llm" which gives us similar food items and its allergens to improve the results
+### 3) RAG - With transfer learning from OpenAI we created a "Similarity LLM" which gives us similar food items and its allergens to improve the results
 ### 4) Frontend/App creation - For our frontend and app creation we used React Native to make the app compatible with your phone for quick and convenient use
 ### (Frontend with TypeScript, Backend with Python, and MQL for Database)
 
