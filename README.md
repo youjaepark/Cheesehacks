@@ -85,7 +85,7 @@ pip install -r requirements.txt
 
 4. Set up your MongoDB database:
 
-- Start MongoDB service
+- Start MongoDB servicen m
 - Create a new database named 'allerview'
 
 ### Running the Project
